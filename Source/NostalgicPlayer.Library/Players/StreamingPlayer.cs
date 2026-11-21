@@ -29,6 +29,7 @@ namespace Polycode.NostalgicPlayer.Library.Players
 		private DurationInfo durationInfo;
 
 		private IOutputAgent outputAgent;
+		private bool visualsStarted;
 		private ResamplerStream soundStream;
 		private StreamingStream streamingStream;
 
@@ -166,9 +167,14 @@ namespace Polycode.NostalgicPlayer.Library.Players
 					StaticModuleInformation = new ModuleInfoStatic();
 					PlayingModuleInformation = new ModuleInfoFloating();
 
-					// Tell all visuals to stop
-					foreach (IVisualAgent visualAgent in agentManager.GetRegisteredVisualAgent())
-						visualAgent.CleanupVisual();
+					// Tell all visuals to stop, but only if they have been told to start
+					if (visualsStarted)
+					{
+						foreach (IVisualAgent visualAgent in agentManager.GetRegisteredVisualAgent())
+							visualAgent.CleanupVisual();
+
+						visualsStarted = false;
+					}
 				}
 			}
 			catch (Exception)
@@ -218,6 +224,8 @@ namespace Polycode.NostalgicPlayer.Library.Players
 
 					visualAgent.InitVisual(StaticModuleInformation.Channels, StaticModuleInformation.VirtualChannels, StaticModuleInformation.PlayBackSpeakers);
 				}
+
+				visualsStarted = true;
 
 				outputAgent.Play();
 			}
